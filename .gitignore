@@ -1,0 +1,92 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+tunnel.log
+tunnel_output.txt
+
+# Data files
+data/
+*.csv
+*.json
+*.pkl
+*.pickle
+*.db
+*.sqlite
+
+# SSL certificates
+ssl/
+*.crt
+*.key
+*.pem
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Config files (except those needed)
+config.toml
+*.toml
+*.ini
+*.cfg
+
+# Test files
+test_*.py
+*_test.py
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Deployment files
+deploy/
+build/
+dist/
