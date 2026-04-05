@@ -1,0 +1,25 @@
+[theme]
+base = "dark"
+primaryColor = "#00ff88"
+backgroundColor = "#0e1117"
+secondaryBackgroundColor = "#262730"
+textColor = "#fafafa"
+font = "sans serif"
+
+[server]
+headless = true
+enableCORS = false
+enableXsrfProtection = true
+maxUploadSize = 200
+
+[browser]
+serverAddress = "paper-trading-daazprime.streamlit.app"
+gatherUsageStats = false
+
+[client]
+showErrorDetails = true
+caching = true
+
+[runner]
+magicEnabled = false
+postScriptGC = false
