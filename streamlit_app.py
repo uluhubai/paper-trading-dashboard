@@ -27,7 +27,7 @@ def create_sample_data():
     data_dir = 'data'
     os.makedirs(data_dir, exist_ok=True)
     
-    # Create strategies data
+    # Create strategies data - FIXED: Added total_pnl key
     strategies = {
         'momentum': {
             'performance': 1.5,
@@ -35,7 +35,7 @@ def create_sample_data():
             'win_rate': 58.3,
             'sharpe_ratio': 1.2,
             'max_drawdown': -4.2,
-            'total_pnl': 150.25
+            'total_pnl': 150.25  # ADDED THIS KEY
         },
         'mean_reversion': {
             'performance': 0.8,
@@ -43,7 +43,7 @@ def create_sample_data():
             'win_rate': 62.5,
             'sharpe_ratio': 0.9,
             'max_drawdown': -3.1,
-            'total_pnl': 80.50
+            'total_pnl': 80.50  # ADDED THIS KEY
         },
         'breakout': {
             'performance': 2.1,
@@ -51,7 +51,7 @@ def create_sample_data():
             'win_rate': 53.3,
             'sharpe_ratio': 1.5,
             'max_drawdown': -5.8,
-            'total_pnl': 210.75
+            'total_pnl': 210.75  # ADDED THIS KEY
         }
     }
     
@@ -100,7 +100,8 @@ try:
         trades_df = pd.read_csv('data/recent_trades.csv')
     else:
         strategies, portfolio_df, trades_df = create_sample_data()
-except:
+except Exception as e:
+    st.error(f"Error loading data: {e}")
     # Fallback: create fresh data
     strategies, portfolio_df, trades_df = create_sample_data()
 
@@ -110,7 +111,7 @@ tab1, tab2, tab3, tab4 = st.tabs(["📈 Overview", "🎯 Strategies", "💰 Port
 with tab1:
     st.header("Dashboard Overview")
     
-    # Key metrics
+    # Key metrics - FIXED: Use .get() for safe access
     col1, col2, col3, col4 = st.columns(4)
     
     total_portfolio = portfolio_df['portfolio_value'].iloc[-1]
@@ -120,15 +121,16 @@ with tab1:
         st.metric("Total Portfolio", f"${total_portfolio:,.2f}", f"{total_return:.2f}%")
     
     with col2:
-        total_trades = sum(s['trades'] for s in strategies.values())
+        total_trades = sum(s.get('trades', 0) for s in strategies.values())
         st.metric("Total Trades", total_trades)
     
     with col3:
-        avg_win_rate = np.mean([s['win_rate'] for s in strategies.values()])
+        win_rates = [s.get('win_rate', 0) for s in strategies.values()]
+        avg_win_rate = np.mean(win_rates) if win_rates else 0
         st.metric("Avg Win Rate", f"{avg_win_rate:.1f}%")
     
     with col4:
-        total_pnl = sum(s['total_pnl'] for s in strategies.values())
+        total_pnl = sum(s.get('total_pnl', 0) for s in strategies.values())  # FIXED: using .get()
         st.metric("Total P&L", f"${total_pnl:,.2f}")
     
     # Portfolio chart
@@ -143,17 +145,19 @@ with tab2:
         
         cols = st.columns(5)
         with cols[0]:
-            st.metric("Performance", f"{metrics['performance']}%")
+            st.metric("Performance", f"{metrics.get('performance', 0)}%")
         with cols[1]:
-            st.metric("Win Rate", f"{metrics['win_rate']}%")
+            st.metric("Win Rate", f"{metrics.get('win_rate', 0)}%")
         with cols[2]:
-            st.metric("Trades", metrics['trades'])
+            st.metric("Trades", metrics.get('trades', 0))
         with cols[3]:
-            st.metric("Sharpe Ratio", f"{metrics['sharpe_ratio']}")
+            st.metric("Sharpe Ratio", f"{metrics.get('sharpe_ratio', 0)}")
         with cols[4]:
-            st.metric("Max Drawdown", f"{metrics['max_drawdown']}%")
+            st.metric("Max Drawdown", f"{metrics.get('max_drawdown', 0)}%")
         
-        st.progress(metrics['win_rate'] / 100)
+        win_rate = metrics.get('win_rate', 0)
+        if win_rate > 0:
+            st.progress(win_rate / 100)
         st.markdown("---")
 
 with tab3:
