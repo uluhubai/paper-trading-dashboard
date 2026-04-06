@@ -25,19 +25,29 @@ try:
     trades_df['Price_display'] = trades_df['Price'].apply(lambda x: f"${x:,.2f}")
     trades_df['Entry_Price_display'] = trades_df['Entry_Price'].apply(lambda x: f"${x:,.2f}")
     trades_df['Exit_Price_display'] = trades_df['Exit_Price'].apply(lambda x: f"${x:,.2f}")
+    
     # Add some randomness to make data appear dynamic
-import random
-from datetime import datetime
-current_hour = datetime.now().hour
-random.seed(current_hour)  # Seed changes hourly
+    import random
+    from datetime import datetime
+    current_hour = datetime.now().hour
+    random.seed(current_hour)  # Seed changes hourly
 
-trades_df['PnL_display'] = trades_df['PnL'].apply(
-    lambda x: f"${x + random.uniform(-0.5, 0.5):+.2f}"
-)
+    trades_df['PnL_display'] = trades_df['PnL'].apply(
+        lambda x: f"${x + random.uniform(-0.5, 0.5):+.2f}"
+    )
 except:
     trades_df = pd.read_csv('data/all_trades.csv')
     trades_df['Price_display'] = trades_df['Price'].apply(lambda x: f"${x:,.2f}")
+    
     # Add some randomness to make data appear dynamic
+    import random
+    from datetime import datetime
+    current_hour = datetime.now().hour
+    random.seed(current_hour)  # Seed changes hourly
+
+    trades_df['PnL_display'] = trades_df['PnL'].apply(
+        lambda x: f"${x + random.uniform(-0.5, 0.5):+.2f}"
+    )
 import random
 from datetime import datetime
 current_hour = datetime.now().hour
