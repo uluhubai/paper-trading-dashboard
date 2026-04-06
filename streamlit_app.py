@@ -1,3 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from trading_simulator import simulator
+
 """
 Paper Trading Dashboard - WITH RESTORED FEATURES
 Gradual restoration of missing functionality
@@ -18,7 +23,15 @@ st.title("📊 Paper Trading Dashboard")
 st.markdown("**Multi-Strategy Trading Simulation**")
 
 # Generate dynamic data
-trades = []
+# Obter dados dinâmicos do simulador
+current_data = simulator.get_current_data()
+
+# Extrair dados para compatibilidade
+portfolio_value = current_data['portfolio_value']
+active_positions = current_data['active_positions']
+today_trades_count = current_data['today_trades_count']
+recent_trades = current_data['recent_trades']
+asset_performance = current_data['asset_performance']
 symbols = ['BTC', 'ETH', 'ADA', 'SOL', 'DOT', 'XRP', 'LINK']
 
 for i in range(25):  # More trades
@@ -89,30 +102,88 @@ with st.sidebar:
 # 5 TABS including RESTORED Performance tab
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Overview", "📊 Performance", "💰 Portfolio", "📊 Trades", "📚 Documentation"])
 
-with tab1:  # Overview
-    st.subheader("Portfolio Performance")
+with tab1:  # Overview - COM DADOS DINÂMICOS
+    st.header("📈 Portfolio Overview - LIVE")
     
+    # PORTFOLIO SNAPSHOT COM DADOS REAIS
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Portfolio Value", "$10,164.07", "+1.64%")
+        initial_value = 10000
+        current_value = current_data['portfolio_value']
+        change_pct = ((current_value - initial_value) / initial_value) * 100
+        st.metric("Portfolio Value", f"${current_value:,.2f}", f"{change_pct:+.2f}%")
     
     with col2:
-        st.metric("Daily Change", "+0.42%")
+        st.metric("Cash Balance", f"${current_data['cash']:,.2f}")
     
     with col3:
-        st.metric("Max Drawdown", "-2.1%")
+        st.metric("Active Positions", current_data['active_positions'])
     
     with col4:
-        st.metric("Sharpe Ratio", "1.24")
+        st.metric("Today's Trades", current_data['today_trades_count'])
     
-    # Chart
-    dates = [(datetime.now() - timedelta(days=i)).strftime('%m-%d') for i in range(30, -1, -1)]
-    values = [10000 + i*5 + (i%7)*10 + np.random.uniform(-20, 20) for i in range(31)]
-    chart_data = pd.DataFrame({'Date': dates, 'Value': values})
-    st.line_chart(chart_data.set_index('Date')['Value'], height=300)
-
-with tab2:  # RESTORED Performance tab
+    st.markdown("---")
+    
+    # RECENT ACTIVITY - TRADES REAIS
+    st.subheader("🔄 Recent Activity")
+    
+    if current_data['recent_trades']:
+        import pandas as pd
+        recent_trades_df = pd.DataFrame(current_data['recent_trades'])
+        
+        # Formatar timestamps
+        if 'timestamp' in recent_trades_df.columns:
+            from datetime import datetime
+            recent_trades_df['timestamp'] = recent_trades_df['timestamp'].apply(
+                lambda x: x.strftime('%H:%M:%S') if isinstance(x, datetime) else str(x)
+            )
+        
+        # Renomear colunas
+        recent_trades_df = recent_trades_df.rename(columns={
+            'timestamp': 'Time',
+            'asset': 'Asset',
+            'action': 'Action',
+            'quantity': 'Quantity',
+            'current_price': 'Price',
+            'pnl': 'PnL',
+            'strategy': 'Strategy'
+        })
+        
+        # Mostrar colunas relevantes
+        display_cols = ['Time', 'Asset', 'Action', 'Quantity', 'Price', 'PnL']
+        display_cols = [c for c in display_cols if c in recent_trades_df.columns]
+        
+        st.dataframe(
+            recent_trades_df[display_cols],
+            use_container_width=True,
+            height=200
+        )
+    else:
+        st.info("No trades yet. Trades will generate automatically every 2-5 minutes.")
+    
+    st.markdown("---")
+    
+    # ASSET PERFORMANCE - DADOS REAIS
+    st.subheader("📊 Asset Performance")
+    
+    if current_data['asset_performance']:
+        performance_data = []
+        for asset, data in current_data['asset_performance'].items():
+            if data['quantity'] > 0:
+                performance_data.append({
+                    'Asset': asset,
+                    'Price': f"${data['price']:,.2f}",
+                    'Change %': f"{data['change_pct']:+.2f}%",
+                    'Quantity': data['quantity'],
+                    'Value': f"${data['value']:,.2f}"
+                })
+        
+        if performance_data:
+            performance_df = pd.DataFrame(performance_data)
+            st.dataframe(performance_df, use_container_width=True)
+        else:
+            st.info("No active positions. Trades will generate positions automatically.")  # RESTORED Performance tab
     st.header("📊 Performance Analysis")
     
     st.subheader("Strategy Performance")
