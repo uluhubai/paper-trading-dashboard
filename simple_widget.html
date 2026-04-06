@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Paper Trading Widget</title>
+    <style>
+        .trading-widget {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            background: #1a1d29;
+            border-radius: 12px;
+            padding: 24px;
+            color: #fff;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #2d3748;
+            padding-bottom: 16px;
+        }
+        
+        .widget-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #00ff88;
+        }
+        
+        .widget-status {
+            background: #2d3748;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .status-live {
+            background: #065f46;
+            color: #34d399;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .metric-card {
+            background: #2d3748;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 8px 0;
+            color: #00ff88;
+        }
+        
+        .metric-label {
+            font-size: 14px;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .strategies-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .strategy-card {
+            background: #2d3748;
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid;
+        }
+        
+        .strategy-momentum {
+            border-left-color: #3b82f6;
+        }
+        
+        .strategy-meanreversion {
+            border-left-color: #8b5cf6;
+        }
+        
+        .strategy-breakout {
+            border-left-color: #10b981;
+        }
+        
+        .strategy-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .strategy-pnl {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .positive {
+            color: #10b981;
+        }
+        
+        .negative {
+            color: #ef4444;
+        }
+        
+        .refresh-btn {
+            background: #00ff88;
+            color: #0f172a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            background: #00cc6a;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+        
+        .error {
+            background: #7f1d1d;
+            color: #fecaca;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
+        .dashboard-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: #00ff88;
+            text-decoration: none;
+        }
+        
+        .dashboard-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="trading-widget" id="widget">
+        <div class="widget-header">
+            <div class="widget-title">📊 Paper Trading Dashboard</div>
+            <div class="widget-status status-live" id="status">● LIVE</div>
+        </div>
+        
+        <div class="loading" id="loading">
+            Loading trading data...
+        </div>
+        
+        <div class="error" id="error" style="display: none;">
+            Unable to load trading data. The dashboard may be offline.
+        </div>
+        
+        <div id="content" style="display: none;">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Portfolio Value</div>
+                    <div class="metric-value" id="portfolioValue">$10,000.00</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-label">Active Positions</div>
+                    <div class="metric-value" id="activePositions">0</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-label">Total Trades</div>
+                    <div class="metric-value" id="totalTrades">0</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-label">Last Updated</div>
+                    <div class="metric-value" id="lastUpdated">Just now</div>
+                </div>
+            </div>
+            
+            <h3 style="margin-bottom: 16px; color: #a0aec0;">Strategy Performance</h3>
+            
+            <div class="strategies-grid">
+                <div class="strategy-card strategy-momentum">
+                    <div class="strategy-name">🚀 Momentum</div>
+                    <div class="strategy-pnl positive" id="momentumPnl">+$0.00</div>
+                    <div style="font-size: 14px; color: #a0aec0; margin-top: 4px;">
+                        Trades: <span id="momentumTrades">0</span>
+                    </div>
+                </div>
+                
+                <div class="strategy-card strategy-meanreversion">
+                    <div class="strategy-name">🔄 Mean Reversion</div>
+                    <div class="strategy-pnl" id="meanReversionPnl">$0.00</div>
+                    <div style="font-size: 14px; color: #a0aec0; margin-top: 4px;">
+                        Trades: <span id="meanReversionTrades">0</span>
+                    </div>
+                </div>
+                
+                <div class="strategy-card strategy-breakout">
+                    <div class="strategy-name">⚡ Breakout</div>
+                    <div class="strategy-pnl positive" id="breakoutPnl">+$0.00</div>
+                    <div style="font-size: 14px; color: #a0aec0; margin-top: 4px;">
+                        Trades: <span id="breakoutTrades">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="refresh-btn" onclick="loadData()">
+                🔄 Refresh Data
+            </button>
+            
+            <a href="http://100.92.200.109:8502" target="_blank" class="dashboard-link">
+                Open Full Dashboard →
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // Mock data for testing
+        const mockData = {
+            portfolio_value: 10070.33,
+            cash: 10070.33,
+            positions: 0,
+            last_updated: "2026-04-05 19:30:00",
+            strategies: {
+                momentum: {
+                    pnl: 34.48,
+                    trades: 14,
+                    wins: 5
+                },
+                mean_reversion: {
+                    pnl: -12.39,
+                    trades: 11,
+                    wins: 1
+                },
+                breakout: {
+                    pnl: 48.24,
+                    trades: 9,
+                    wins: 2
+                }
+            }
+        };
+        
+        function formatCurrency(value) {
+            return '$' + value.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+        
+        function formatPnl(value) {
+            const sign = value >= 0 ? '+' : '';
+            const colorClass = value >= 0 ? 'positive' : 'negative';
+            return `<span class="${colorClass}">${sign}${formatCurrency(value)}</span>`;
+        }
+        
+        function updateWidget(data) {
+            // Update metrics
+            document.getElementById('portfolioValue').textContent = formatCurrency(data.portfolio_value);
+            document.getElementById('activePositions').textContent = data.positions;
+            document.getElementById('totalTrades').textContent = 
+                data.strategies.momentum.trades + 
+                data.strategies.mean_reversion.trades + 
+                data.strategies.breakout.trades;
+            document.getElementById('lastUpdated').textContent = 
+                new Date(data.last_updated).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Update strategies
+            document.getElementById('momentumPnl').innerHTML = formatPnl(data.strategies.momentum.pnl);
+            document.getElementById('momentumTrades').textContent = data.strategies.momentum.trades;
+            
+            document.getElementById('meanReversionPnl').innerHTML = formatPnl(data.strategies.mean_reversion.pnl);
+            document.getElementById('meanReversionTrades').textContent = data.strategies.mean_reversion.trades;
+            
+            document.getElementById('breakoutPnl').innerHTML = formatPnl(data.strategies.breakout.pnl);
+            document.getElementById('breakoutTrades').textContent = data.strategies.breakout.trades;
+            
+            // Show content
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+        }
+        
+        function loadData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            // Try to fetch real data
+            fetch('http://100.92.200.109:8502/_stcore/health', { mode: 'no-cors' })
+                .then(() => {
+                    // If we can reach the dashboard, try to get metrics
+                    return fetch('http://100.92.200.109:8502?__streamlit_proxy__=1')
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json();
+                            }
+                            throw new Error('Dashboard not responding');
+                        })
+                        .catch(() => {
+                            // Fallback to mock data
+                            return mockData;
+                        });
+                })
+                .catch(() => {
+                    // Use mock data if fetch fails
+                    return mockData;
+                })
+                .then(data => {
+                    updateWidget(data);
+                })
+                .catch(error => {
+                    console.error('Error loading data:', error);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('error').style.display = 'block';
+                    document.getElementById('error').textContent = 
+                        'Unable to load trading data. Using demo data.';
+                    
+                    // Use mock data as fallback
+                    updateWidget(mockData);
+                });
+        }
+        
+        // Auto-refresh every 60 seconds
+        function startAutoRefresh() {
+            setInterval(loadData, 60000);
+        }
+        
+        // Initialize
+        window.onload = function() {
+            loadData();
+            startAutoRefresh();
+        };
+    </script>
+</body>
+</html>

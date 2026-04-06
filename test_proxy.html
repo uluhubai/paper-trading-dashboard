@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Proxy CORS</title>
+</head>
+<body>
+    <h1>Teste Iframe via Proxy CORS</h1>
+    
+    <h2>1. Direct (sem proxy) - Provavelmente falha:</h2>
+    <iframe src="http://100.92.200.109:8502" width="100%" height="300"></iframe>
+    
+    <h2>2. Via Proxy CORS (port 8503) - Deve funcionar:</h2>
+    <iframe src="http://100.92.200.109:8503/dashboard" width="100%" height="500"></iframe>
+    
+    <h2>3. Código para WordPress:</h2>
+    <pre>
+&lt;iframe 
+    src="http://100.92.200.109:8503/dashboard" 
+    width="100%" 
+    height="700px"
+    style="border: 1px solid #ddd; border-radius: 8px;"
+    title="Paper Trading Dashboard"&gt;
+&lt;/iframe&gt;
+    </pre>
+    
+    <h2>4. Teste Headers:</h2>
+    <div id="headers"></div>
+    
+    <script>
+        // Test headers
+        fetch('http://100.92.200.109:8503/dashboard')
+            .then(r => {
+                let headers = '';
+                r.headers.forEach((v, k) => {
+                    headers += `${k}: ${v}<br>`;
+                });
+                document.getElementById('headers').innerHTML = headers;
+            });
+    </script>
+</body>
+</html>
