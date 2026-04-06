@@ -1,6 +1,6 @@
 """
-Paper Trading Dashboard - BALANCED VERSION
-Keeps core functionality but avoids complex components
+Paper Trading Dashboard - WITH DOCUMENTATION
+Balanced version with proper documentation
 """
 
 import streamlit as st
@@ -17,9 +17,88 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Title
+# Title with documentation link
 st.title("📊 Paper Trading Dashboard")
 st.markdown("**Multi-Strategy Trading Simulation**")
+
+# Documentation expander
+with st.expander("📚 **Documentation & How to Use**", expanded=False):
+    st.markdown("""
+    ## 📖 **Paper Trading Dashboard Documentation**
+    
+    ### 🎯 **What is this?**
+    A simulated trading dashboard that tests 3 different trading strategies with virtual money.
+    
+    ### 🔧 **How it works:**
+    1. **Virtual Portfolio:** Starts with $10,000 virtual capital
+    2. **3 Strategies:** Runs simultaneously and independently
+    3. **Simulated Trades:** Based on historical price patterns
+    4. **Performance Tracking:** Real-time metrics and charts
+    
+    ### 📊 **Dashboard Sections:**
+    
+    #### **1. Overview Tab**
+    - **Portfolio Value:** Current value of your virtual portfolio
+    - **Total Trades:** Number of trades executed by all strategies
+    - **Avg Performance:** Average return across all strategies
+    - **Active Positions:** Currently open positions
+    - **Portfolio Chart:** Historical performance over time
+    
+    #### **2. Portfolio Tab**
+    - **Allocation:** Breakdown by asset (BTC, ETH, ADA, etc.)
+    - **Performance Metrics:** Risk-adjusted returns and statistics
+    
+    #### **3. Trades Tab**
+    - **Recent Activity:** Last 15 simulated trades
+    - **Trade Statistics:** Buy/Sell ratio and total volume
+    
+    ### 🎯 **Trading Strategies:**
+    
+    #### **Momentum Strategy**
+    - **Logic:** Follows price trends - buys when price is rising, sells when falling
+    - **Best for:** Strong trending markets
+    - **Risk:** High during market reversals
+    
+    #### **Mean Reversion Strategy**
+    - **Logic:** Bets prices return to average - buys when low, sells when high
+    - **Best for:** Range-bound markets
+    - **Risk:** Low in trending markets
+    
+    #### **Breakout Strategy**
+    - **Logic:** Captures price breakouts from consolidation
+    - **Best for:** Volatile markets with clear support/resistance
+    - **Risk:** False breakouts can cause losses
+    
+    ### ⚙️ **Sidebar Controls:**
+    
+    #### **Auto-refresh**
+    - Automatically updates data every 30 seconds
+    - Toggle on/off as needed
+    
+    #### **Focus Strategy**
+    - Filter view to specific strategy
+    - "All Strategies" shows combined performance
+    
+    #### **Strategy Performance**
+    - Real-time metrics for each strategy
+    - Progress bars show win rates
+    
+    ### 🔄 **Data Updates:**
+    - **Manual:** Click "Refresh Data" button
+    - **Auto:** Enable auto-refresh checkbox
+    - **Simulated:** Trades generated algorithmically
+    
+    ### ⚠️ **Important Notes:**
+    - This is **PAPER TRADING** only - no real money involved
+    - Past performance ≠ future results
+    - For educational purposes only
+    - Always do your own research before real trading
+    
+    ### 🆘 **Need Help?**
+    - Check console for errors (F12)
+    - Clear browser cache if issues persist
+    - Test in incognito mode if using crypto wallet extensions
+    """)
 
 # Create sample data
 def create_data():
