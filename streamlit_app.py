@@ -1,6 +1,6 @@
 """
-Paper Trading Dashboard - WITH DOCUMENTATION
-Balanced version with proper documentation
+Paper Trading Dashboard - FINAL VERSION
+With documentation tab and improved strategy performance display
 """
 
 import streamlit as st
@@ -17,88 +17,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Title with documentation link
+# Title
 st.title("📊 Paper Trading Dashboard")
 st.markdown("**Multi-Strategy Trading Simulation**")
-
-# Documentation expander
-with st.expander("📚 **Documentation & How to Use**", expanded=False):
-    st.markdown("""
-    ## 📖 **Paper Trading Dashboard Documentation**
-    
-    ### 🎯 **What is this?**
-    A simulated trading dashboard that tests 3 different trading strategies with virtual money.
-    
-    ### 🔧 **How it works:**
-    1. **Virtual Portfolio:** Starts with $10,000 virtual capital
-    2. **3 Strategies:** Runs simultaneously and independently
-    3. **Simulated Trades:** Based on historical price patterns
-    4. **Performance Tracking:** Real-time metrics and charts
-    
-    ### 📊 **Dashboard Sections:**
-    
-    #### **1. Overview Tab**
-    - **Portfolio Value:** Current value of your virtual portfolio
-    - **Total Trades:** Number of trades executed by all strategies
-    - **Avg Performance:** Average return across all strategies
-    - **Active Positions:** Currently open positions
-    - **Portfolio Chart:** Historical performance over time
-    
-    #### **2. Portfolio Tab**
-    - **Allocation:** Breakdown by asset (BTC, ETH, ADA, etc.)
-    - **Performance Metrics:** Risk-adjusted returns and statistics
-    
-    #### **3. Trades Tab**
-    - **Recent Activity:** Last 15 simulated trades
-    - **Trade Statistics:** Buy/Sell ratio and total volume
-    
-    ### 🎯 **Trading Strategies:**
-    
-    #### **Momentum Strategy**
-    - **Logic:** Follows price trends - buys when price is rising, sells when falling
-    - **Best for:** Strong trending markets
-    - **Risk:** High during market reversals
-    
-    #### **Mean Reversion Strategy**
-    - **Logic:** Bets prices return to average - buys when low, sells when high
-    - **Best for:** Range-bound markets
-    - **Risk:** Low in trending markets
-    
-    #### **Breakout Strategy**
-    - **Logic:** Captures price breakouts from consolidation
-    - **Best for:** Volatile markets with clear support/resistance
-    - **Risk:** False breakouts can cause losses
-    
-    ### ⚙️ **Sidebar Controls:**
-    
-    #### **Auto-refresh**
-    - Automatically updates data every 30 seconds
-    - Toggle on/off as needed
-    
-    #### **Focus Strategy**
-    - Filter view to specific strategy
-    - "All Strategies" shows combined performance
-    
-    #### **Strategy Performance**
-    - Real-time metrics for each strategy
-    - Progress bars show win rates
-    
-    ### 🔄 **Data Updates:**
-    - **Manual:** Click "Refresh Data" button
-    - **Auto:** Enable auto-refresh checkbox
-    - **Simulated:** Trades generated algorithmically
-    
-    ### ⚠️ **Important Notes:**
-    - This is **PAPER TRADING** only - no real money involved
-    - Past performance ≠ future results
-    - For educational purposes only
-    - Always do your own research before real trading
-    
-    ### 🆘 **Need Help?**
-    - Check console for errors (F12)
-    - Clear browser cache if issues persist
-    - Test in incognito mode if using crypto wallet extensions
-    """)
 
 # Create sample data
 def create_data():
@@ -128,11 +49,29 @@ def create_data():
     
     trades_df = pd.DataFrame(trades)
     
-    # Strategy performance
+    # Strategy performance - IMPROVED with PnL
     strategies = {
-        'Momentum': {'trades': 12, 'performance': 1.5, 'win_rate': 58.3},
-        'Mean Reversion': {'trades': 8, 'performance': 0.8, 'win_rate': 62.5},
-        'Breakout': {'trades': 15, 'performance': 2.1, 'win_rate': 53.3}
+        'Momentum': {
+            'trades': 41,
+            'performance': 1.5,
+            'win_rate': 36.6,
+            'total_pnl': 129.05,
+            'description': 'Trend following - buys rising assets, sells falling ones'
+        },
+        'Mean Reversion': {
+            'trades': 35,
+            'performance': 0.8,
+            'win_rate': 14.3,
+            'total_pnl': -60.09,
+            'description': 'Buy low, sell high - trades against extremes'
+        },
+        'Breakout': {
+            'trades': 23,
+            'performance': 2.1,
+            'win_rate': 26.1,
+            'total_pnl': 95.11,
+            'description': 'Captures price breakouts from consolidation ranges'
+        }
     }
     
     return portfolio_df, trades_df, strategies
@@ -155,16 +94,16 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # Strategy metrics
-    st.subheader("Strategy Performance")
-    for name, metrics in strategies.items():
-        st.markdown(f"**{name}**")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Trades", metrics['trades'])
-        with col2:
-            st.metric("Performance", f"{metrics['performance']}%")
-        st.progress(metrics['win_rate'] / 100)
+    # Quick strategy stats
+    st.subheader("Quick Stats")
+    
+    total_trades = sum(s['trades'] for s in strategies.values())
+    total_pnl = sum(s['total_pnl'] for s in strategies.values())
+    avg_win_rate = np.mean([s['win_rate'] for s in strategies.values()])
+    
+    st.metric("Total Trades", total_trades)
+    st.metric("Total P&L", f"${total_pnl:,.2f}")
+    st.metric("Avg Win Rate", f"{avg_win_rate:.1f}%")
     
     st.markdown("---")
     
@@ -176,8 +115,8 @@ with st.sidebar:
     st.markdown(f"**Last Updated:**")
     st.write(datetime.now().strftime("%Y-%m-%d %H:%M"))
 
-# MAIN CONTENT - Tabs
-tab1, tab2, tab3 = st.tabs(["📈 Overview", "💰 Portfolio", "🔄 Trades"])
+# MAIN CONTENT - Tabs (NOW WITH DOCUMENTATION TAB)
+tab1, tab2, tab3, tab4 = st.tabs(["📈 Overview", "🎯 Strategies", "💰 Portfolio", "📚 Documentation"])
 
 with tab1:
     # Key metrics
@@ -190,7 +129,6 @@ with tab1:
         st.metric("Portfolio Value", f"${current_value:,.2f}", f"{total_return:.2f}%")
     
     with col2:
-        total_trades = sum(s['trades'] for s in strategies.values())
         st.metric("Total Trades", total_trades)
     
     with col3:
@@ -206,6 +144,43 @@ with tab1:
     st.line_chart(portfolio_df.set_index('Date')['Portfolio Value'])
 
 with tab2:
+    st.header("Strategy Performance Comparison")
+    
+    # Display each strategy in columns
+    cols = st.columns(3)
+    
+    for idx, (strategy_name, metrics) in enumerate(strategies.items()):
+        with cols[idx]:
+            # Strategy header with icon
+            st.subheader(f"📈 {strategy_name}")
+            
+            # PnL with color coding
+            pnl_color = "green" if metrics['total_pnl'] > 0 else "red"
+            st.metric("Total PnL", f"${metrics['total_pnl']:,.2f}", 
+                     delta_color="normal" if metrics['total_pnl'] > 0 else "inverse")
+            
+            # Win Rate
+            st.metric("Win Rate", f"{metrics['win_rate']}%")
+            
+            # Trades Executed
+            st.metric("Trades Executed", metrics['trades'])
+            
+            # Description
+            st.markdown(f"*{metrics['description']}*")
+            
+            # Progress bar for win rate
+            st.progress(metrics['win_rate'] / 100)
+            
+            # Strategy-specific stats
+            st.markdown("---")
+            col_a, col_b = st.columns(2)
+            with col_a:
+                st.metric("Performance", f"{metrics['performance']}%")
+            with col_b:
+                daily_avg = metrics['total_pnl'] / 30 if metrics['trades'] > 0 else 0
+                st.metric("Daily Avg", f"${daily_avg:.2f}")
+
+with tab3:
     st.subheader("Portfolio Allocation")
     
     # Simple allocation table
@@ -222,33 +197,104 @@ with tab2:
     st.subheader("Performance Metrics")
     
     metrics_data = {
-        'Metric': ['Total Return', 'Daily Avg', 'Volatility', 'Sharpe Ratio'],
-        'Value': [f'{total_return:.2f}%', '0.15%', '2.3%', '1.4']
+        'Metric': ['Total Return', 'Daily Avg Return', 'Volatility', 'Sharpe Ratio', 'Max Drawdown'],
+        'Value': [f'{total_return:.2f}%', '0.15%', '2.3%', '1.4', '-4.2%']
     }
     
     metrics_df = pd.DataFrame(metrics_data)
     st.table(metrics_df)
+    
+    # Recent trades mini-view
+    st.subheader("Recent Trades Preview")
+    st.table(trades_df.head(5))
 
-with tab3:
-    st.subheader("Recent Trading Activity")
+with tab4:
+    st.header("📚 Documentation & How to Use")
     
-    # Show trades
-    st.table(trades_df)
+    st.markdown("""
+    ## 📖 **Paper Trading Dashboard Documentation**
     
-    # Trade stats
-    col1, col2, col3 = st.columns(3)
+    ### 🎯 **What is this?**
+    A simulated trading dashboard that tests 3 different trading strategies with virtual money.
     
-    with col1:
-        buy_count = len(trades_df[trades_df['Action'] == 'BUY'])
-        st.metric("Buy Orders", buy_count)
+    ### 🔧 **How it works:**
+    1. **Virtual Portfolio:** Starts with $10,000 virtual capital
+    2. **3 Strategies:** Runs simultaneously and independently
+    3. **Simulated Trades:** Based on historical price patterns
+    4. **Performance Tracking:** Real-time metrics and charts
     
-    with col2:
-        sell_count = len(trades_df[trades_df['Action'] == 'SELL'])
-        st.metric("Sell Orders", sell_count)
+    ### 📊 **Dashboard Sections:**
     
-    with col3:
-        total_volume = trades_df['Quantity'].sum()
-        st.metric("Total Volume", f"{total_volume:.3f}")
+    #### **1. Overview Tab**
+    - **Portfolio Value:** Current value of your virtual portfolio
+    - **Total Trades:** Number of trades executed by all strategies
+    - **Avg Performance:** Average return across all strategies
+    - **Active Positions:** Currently open positions
+    - **Portfolio Chart:** Historical performance over time
+    
+    #### **2. Strategies Tab**
+    - **Side-by-side comparison:** All 3 strategies with key metrics
+    - **Total PnL:** Profit & Loss for each strategy (green/red)
+    - **Win Rate:** Percentage of profitable trades
+    - **Trades Executed:** Number of trades per strategy
+    - **Strategy Description:** Logic behind each approach
+    
+    #### **3. Portfolio Tab**
+    - **Allocation:** Breakdown by asset (BTC, ETH, ADA, etc.)
+    - **Performance Metrics:** Risk-adjusted returns and statistics
+    - **Recent Trades:** Last 5 trades for quick reference
+    
+    ### 🎯 **Trading Strategies:**
+    
+    #### **📈 Momentum Strategy**
+    - **Logic:** Follows price trends - buys when price is rising, sells when falling
+    - **Best for:** Strong trending markets
+    - **Risk:** High during market reversals
+    - **Current Stats:** 41 trades, 36.6% win rate, $129.05 PnL
+    
+    #### **📈 Mean Reversion Strategy**
+    - **Logic:** Bets prices return to average - buys when low, sells when high
+    - **Best for:** Range-bound markets
+    - **Risk:** Low in trending markets
+    - **Current Stats:** 35 trades, 14.3% win rate, -$60.09 PnL
+    
+    #### **📈 Breakout Strategy**
+    - **Logic:** Captures price breakouts from consolidation
+    - **Best for:** Volatile markets with clear support/resistance
+    - **Risk:** False breakouts can cause losses
+    - **Current Stats:** 23 trades, 26.1% win rate, $95.11 PnL
+    
+    ### ⚙️ **Sidebar Controls:**
+    
+    #### **Auto-refresh**
+    - Automatically updates data every 30 seconds
+    - Toggle on/off as needed
+    
+    #### **Focus Strategy**
+    - Filter view to specific strategy
+    - "All Strategies" shows combined performance
+    
+    #### **Quick Stats**
+    - At-a-glance overview of total performance
+    - Updates in real-time
+    
+    ### 🔄 **Data Updates:**
+    - **Manual:** Click "Refresh Data" button
+    - **Auto:** Enable auto-refresh checkbox
+    - **Simulated:** Trades generated algorithmically
+    
+    ### ⚠️ **Important Notes:**
+    - This is **PAPER TRADING** only - no real money involved
+    - Past performance ≠ future results
+    - For educational purposes only
+    - Always do your own research before real trading
+    
+    ### 🆘 **Need Help?**
+    - Check console for errors (F12)
+    - Clear browser cache if issues persist
+    - Test in incognito mode if using crypto wallet extensions
+    - Contact support if problems continue
+    """)
 
 # Auto-refresh logic
 if auto_refresh:
@@ -257,4 +303,4 @@ if auto_refresh:
 
 # Footer
 st.markdown("---")
-st.markdown("*Paper trading simulation for educational purposes*")
+st.markdown("*Paper trading simulation for educational purposes* | *Data updates every 30 seconds*")
