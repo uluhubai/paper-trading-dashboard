@@ -1,6 +1,6 @@
 """
-Paper Trading Dashboard - Streamlit Cloud Deployment
-Final version with dark mode fix and better styling
+Paper Trading Dashboard - SIMPLE VERSION
+No CSS overrides, let Streamlit handle themes
 """
 
 import streamlit as st
@@ -13,70 +13,13 @@ from datetime import datetime, timedelta
 # Add current directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Set page config with light theme
+# Set page config - NO THEME FORCING
 st.set_page_config(
     page_title="Paper Trading Dashboard",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# Force light theme
-st.markdown("""
-<style>
-    /* Force light theme */
-    .stApp {
-        background-color: white !important;
-        color: black !important;
-    }
-    
-    .main-header {
-        text-align: center;
-        padding: 20px;
-        background: linear-gradient(90deg, #00ff88 0%, #00ccff 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 2.5em;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
-    
-    /* Sidebar styling */
-    .stSidebar {
-        background-color: #f8f9fa !important;
-        color: black !important;
-    }
-    
-    .stSidebar h1, .stSidebar h2, .stSidebar h3, .stSidebar h4, .stSidebar p {
-        color: black !important;
-    }
-    
-    /* Metric cards */
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white !important;
-        padding: 15px;
-        border-radius: 10px;
-        margin: 10px 0;
-    }
-    
-    /* Force all text to be visible */
-    * {
-        color: black !important;
-    }
-    
-    /* Specific fix for Streamlit Cloud dark mode issue */
-    [data-testid="stSidebar"] {
-        background-color: #f8f9fa !important;
-    }
-    
-    [data-testid="stSidebar"] * {
-        color: #333333 !important;
-    }
-</style>
-
-<div class="main-header">📊 Paper Trading Dashboard</div>
-""", unsafe_allow_html=True)
 
 def create_initial_data_if_missing():
     """Create initial data files if they don't exist"""
@@ -149,18 +92,11 @@ def create_initial_data_if_missing():
 # Create initial data if missing
 create_initial_data_if_missing()
 
-# Sidebar with strategy selection - FORCE VISIBLE TEXT
+# SIMPLE HEADER - NO CSS
+st.title("📊 Paper Trading Dashboard")
+
+# Sidebar with strategy selection
 with st.sidebar:
-    st.markdown("""
-    <style>
-    .sidebar-content * {
-        color: #333333 !important;
-        font-weight: bold !important;
-    }
-    </style>
-    <div class="sidebar-content">
-    """, unsafe_allow_html=True)
-    
     st.header("🎯 Trading Strategies")
     
     # Strategy selection
@@ -180,20 +116,16 @@ with st.sidebar:
             strategies = json.load(f)
         
         for strategy_name, metrics in strategies.items():
-            with st.container():
-                st.markdown(f"""
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                          color: white; padding: 15px; border-radius: 10px; margin: 10px 0;">
-                <h4 style="color: white !important;">{strategy_name.title()} Strategy</h4>
-                <p style="color: white !important;">📈 Performance: {metrics['performance']}%</p>
-                <p style="color: white !important;">🎯 Win Rate: {metrics['win_rate']}%</p>
-                <p style="color: white !important;">🔄 Trades: {metrics['trades']}</p>
-                </div>
-                """, unsafe_allow_html=True)
+            st.markdown(f"**{strategy_name.title()} Strategy**")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Performance", f"{metrics['performance']}%")
+            with col2:
+                st.metric("Win Rate", f"{metrics['win_rate']}%")
+            st.metric("Trades", metrics['trades'])
+            st.markdown("---")
     except:
         st.info("Loading strategy data...")
-    
-    st.markdown("</div>", unsafe_allow_html=True)
 
 # Import and run the main dashboard
 try:
@@ -206,15 +138,8 @@ try:
 except Exception as e:
     st.error(f"Error loading dashboard: {str(e)}")
     
-    # Fallback to basic display with visible text
-    st.markdown("""
-    <style>
-    .fallback-content * {
-        color: #333333 !important;
-    }
-    </style>
-    <div class="fallback-content">
-    """, unsafe_allow_html=True)
+    # SIMPLE fallback - NO CSS
+    st.info("Displaying basic dashboard with sample data...")
     
     # Display sample data
     col1, col2, col3 = st.columns(3)
@@ -243,5 +168,3 @@ except Exception as e:
         st.line_chart(portfolio_df.set_index('timestamp')['portfolio_value'])
     except:
         st.info("No portfolio history available yet")
-    
-    st.markdown("</div>", unsafe_allow_html=True)
